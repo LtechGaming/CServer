@@ -1,9 +1,6 @@
 package com.ltit.cserver;
 
-import com.ltit.cserver.commands.GamemodeCommand;
-import com.ltit.cserver.commands.InfoCommand;
-import com.ltit.cserver.commands.SpawnCommand;
-import com.ltit.cserver.commands.TpCommand;
+import com.ltit.cserver.commands.*;
 import de.articdive.jnoise.generators.noisegen.opensimplex.SuperSimplexNoiseGenerator;
 import de.articdive.jnoise.pipeline.JNoise;
 import net.kyori.adventure.text.Component;
@@ -15,8 +12,12 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.event.entity.EntityDamageEvent;
+import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.*;
@@ -24,6 +25,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.event.item.PickupItemEvent;
+import net.minestom.server.item.enchant.DamageImmunityEffect;
 import net.minestom.server.world.Difficulty;
 
 import java.time.Duration;
@@ -164,13 +166,13 @@ public class Main {
             PlayerSkin skinFromUsername = PlayerSkin.fromUsername(player.getUsername());
             event.setSpawningInstance(instanceContainer);
             player.setRespawnPoint(new Pos(0, 102, 0));
+            Audiences.server().sendMessage(Component.text(String.format("Welcome, %s!", event.getPlayer().getUsername())));
             player.setSkin(skinFromUsername);
         });
 
         globalEventHandler.addListener(PlayerSkinInitEvent.class, event -> {
             PlayerSkin skin = PlayerSkin.fromUsername(event.getPlayer().getUsername());
             event.setSkin(skin);
-            Audiences.server().sendMessage(Component.text(String.format("Welcome, %s!", event.getPlayer().getUsername())));
         });
 
         //Check for block breaks
@@ -219,11 +221,29 @@ public class Main {
                 x.sendMessage(event.getPlayer().getUsername() + " Has died. RIP");
             });
         });
+        globalEventHandler.addListener(EntityDamageEvent.class, event -> {
+            event.getEntity().damage(event.getDamage());
+        });
+        globalEventHandler.addListener(EntityAttackEvent.class, event -> {
+            if(event.getTarget() instanceof Player player){
+                player.damage(DamageType.PLAYER_ATTACK, 1);
+                if(event.getEntity() instanceof Player player1){
+                    player1.setAdditionalHearts(player1.getAdditionalHearts() + 1);
+                }
+            }
+        });
+        globalEventHandler.addListener(InstanceTickEvent.class, event -> {
+            if(MinecraftServer.TICK_PER_SECOND < 20){
+                Audiences.server().sendMessage(Component.text("Server running below 20TPS"));
+            }
+        });
 
         MinecraftServer.getCommandManager().register(new InfoCommand());
         MinecraftServer.getCommandManager().register(new GamemodeCommand());
         MinecraftServer.getCommandManager().register(new SpawnCommand());
         MinecraftServer.getCommandManager().register(new TpCommand());
+        MinecraftServer.getCommandManager().register(new TestTpCommand());
+
 
         MinecraftServer.setDifficulty(Difficulty.NORMAL);
 
