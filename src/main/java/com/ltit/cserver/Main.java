@@ -119,22 +119,24 @@ public class Main {
                             if(nextFeature >=0.85 && nextFeature < 0.9 && y < 59){
                                 unit.modifier().setBlock(x, y, z, Block.SEAGRASS);
                             }
-                            /*
+
                             if(random.nextFloat() >= 0.9975 && y > 59 && y < 90){
-                                int treeHeight = 5;
-                                for(int i = 0; i < treeHeight; i++){
-                                    for(int xt = 0; xt < 5; xt++){
-                                        for(int zt = 0; zt < 5; zt++){
-                                            if(i > 1 && i < treeHeight-1){
-                                                unit.modifier().setBlock(x-2+xt, y+i, z-2+zt, Block.OAK_LEAVES);
+                                int finalY = y;
+                                unit.fork(setter -> {
+                                    int treeHeight = 5;
+                                    for(int i = 0; i < treeHeight; i++){
+                                        for(int xt = 0; xt < 5; xt++){
+                                            for(int zt = 0; zt < 5; zt++){
+                                                if(i > 1 && i < treeHeight-1){
+                                                    setter.setBlock(x-2+xt, finalY +i, z-2+zt, Block.OAK_LEAVES);
+                                                }
                                             }
                                         }
+                                        setter.setBlock(x, finalY +i, z, Block.OAK_LOG);
                                     }
-                                    unit.modifier().setBlock(x, y+i, z, Block.OAK_LOG);
-                                }
-                                unit.modifier().setBlock(x, y+treeHeight, z, Block.OAK_LEAVES);
-
-                            }*/
+                                    setter.setBlock(x, finalY +treeHeight, z, Block.OAK_LEAVES);
+                                });
+                            }
                         }
 
                     }
