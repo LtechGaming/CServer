@@ -129,6 +129,16 @@ public class Main {
                                             for(int zt = 0; zt < 5; zt++){
                                                 if(i > 1 && i < treeHeight-1){
                                                     setter.setBlock(x-2+xt, finalY +i, z-2+zt, Block.OAK_LEAVES);
+                                                    Random treeAirRandom = new Random();
+                                                    if(i == 3 && ((xt == 0 || xt == 4) && (zt == 0 || zt == 4)) && treeAirRandom.nextFloat() < 0.5){
+                                                        setter.setBlock(x-2+xt, finalY +i, z-2+zt, Block.AIR);
+                                                    }
+                                                }
+                                                if (i > treeHeight-2){
+                                                    if((xt == 2 && (zt == 1 || zt == 3)) || (zt == 2 && (xt == 1 || xt == 3))){
+                                                        setter.setBlock(x-2+xt, finalY +i, z-2+zt, Block.OAK_LEAVES);
+                                                        setter.setBlock(x-2+xt, finalY +i+1, z-2+zt, Block.OAK_LEAVES);
+                                                    }
                                                 }
                                             }
                                         }
