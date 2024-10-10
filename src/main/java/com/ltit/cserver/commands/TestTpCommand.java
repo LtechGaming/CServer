@@ -9,7 +9,7 @@ public class TestTpCommand extends Command {
         super("testtp");
         setDefaultExecutor((sender, context) -> {
             if(sender instanceof Player player){
-                player.teleport(new Pos(Double.MAX_VALUE, 100, 0));
+                player.teleport(new Pos((double) 30000000, 100, 0));
             }
         });
     }

@@ -38,22 +38,22 @@ public class Main {
         // Register Events (set spawn instance, teleport player at spawn)
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
+        Long lowLimit = 5L;
+        Long highLimit = Long.MAX_VALUE - 5L;
+        Long seed = lowLimit + (long) (Math.random() * (highLimit - lowLimit));
 
         // Set the ChunkGenerator
         instanceContainer.setGenerator(unit -> {
             // unit.modifier().fillHeight(0, 40, Block.GRASS_BLOCK);
-            Long lowLimit = 5L;
-            Long highLimit = Long.MAX_VALUE - 5L;
-            Long seed = lowLimit + (long) (Math.random() * (highLimit - lowLimit));
             // FastSimplexNoiseGenerator fastSimplexNoiseGenerator = new FastSimplexNoiseGenerator(seed, Simplex2DVariant.IMPROVE_X);
             JNoise noise = JNoise.newBuilder()
-                    .superSimplex(SuperSimplexNoiseGenerator.newBuilder())
+                    .superSimplex(SuperSimplexNoiseGenerator.newBuilder().setSeed(seed))
                     .scale(0.01)
                     .addModifier(v -> v * 20)
                     .build();
             Point start = unit.absoluteStart();
             Point size = unit.size();
-            Random random = new Random();
+            Random random = new Random(seed);
             for (int xo = 0; xo < size.x(); xo++){
                 for (int zo = 0; zo < size.z(); zo++){
                     int x = (int) (start.x() + xo);
@@ -131,9 +131,17 @@ public class Main {
                                             for(int zt = 0; zt < 5; zt++){
                                                 if(i > 1 && i < treeHeight-1){
                                                     setter.setBlock(x-2+xt, finalY +i, z-2+zt, Block.OAK_LEAVES);
-                                                    Random treeAirRandom = new Random();
-                                                    if(i == 3 && ((xt == 0 || xt == 4) && (zt == 0 || zt == 4)) && treeAirRandom.nextFloat() < 0.5){
-                                                        setter.setBlock(x-2+xt, finalY +i, z-2+zt, Block.AIR);
+                                                    if(i == 3 && ((xt == 0 || xt == 4) && (zt == 0 || zt == 4)) && random.nextFloat() < 0.8){
+                                                        var airsize = random.nextFloat();
+                                                        if(airsize < 0.33){
+                                                            setter.setBlock(x - 2 + xt, finalY + i, z - 2 + zt, Block.AIR);
+                                                        } else if (airsize < 0.66) {
+                                                            setter.setBlock(x - 2 + xt, finalY + i-1, z - 2 + zt, Block.AIR);
+                                                        }
+                                                        else {
+                                                            setter.setBlock(x - 2 + xt, finalY + i-1, z - 2 + zt, Block.AIR);
+                                                            setter.setBlock(x - 2 + xt, finalY + i, z - 2 + zt, Block.AIR);
+                                                        }
                                                     }
                                                 }
                                                 if (i > treeHeight-2){
@@ -227,9 +235,9 @@ public class Main {
         globalEventHandler.addListener(EntityAttackEvent.class, event -> {
             if(event.getTarget() instanceof Player player){
                 player.damage(DamageType.PLAYER_ATTACK, 1);
-                if(event.getEntity() instanceof Player player1){
+                /*if(event.getEntity() instanceof Player player1){
                     player1.setAdditionalHearts(player1.getAdditionalHearts() + 1);
-                }
+                }*/
             }
         });
         globalEventHandler.addListener(InstanceTickEvent.class, event -> {
