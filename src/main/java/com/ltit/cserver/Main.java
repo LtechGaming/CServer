@@ -1,7 +1,10 @@
 package com.ltit.cserver;
 
 import com.ltit.cserver.commands.*;
+import de.articdive.jnoise.generators.noisegen.opensimplex.FastSimplexNoiseGenerator;
 import de.articdive.jnoise.generators.noisegen.opensimplex.SuperSimplexNoiseGenerator;
+import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
+import de.articdive.jnoise.generators.noisegen.worley.WorleyNoiseGenerator;
 import de.articdive.jnoise.pipeline.JNoise;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -33,6 +36,7 @@ import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
+
         // Initialize the server
         MinecraftServer minecraftServer = MinecraftServer.init();
         // Register Events (set spawn instance, teleport player at spawn)
@@ -44,16 +48,21 @@ public class Main {
 
         // Set the ChunkGenerator
         instanceContainer.setGenerator(unit -> {
-            // unit.modifier().fillHeight(0, 40, Block.GRASS_BLOCK);
-            // FastSimplexNoiseGenerator fastSimplexNoiseGenerator = new FastSimplexNoiseGenerator(seed, Simplex2DVariant.IMPROVE_X);
+            // unit.modifier().fillHeight(0, 40, Block.GRASS_BLOCK); // This is the original terrain generation
             JNoise noise = JNoise.newBuilder()
-                    .superSimplex(SuperSimplexNoiseGenerator.newBuilder().setSeed(seed))
-                    .scale(0.01)
-                    .addModifier(v -> v * 20)
+                    .superSimplex(SuperSimplexNoiseGenerator.newBuilder().setSeed(seed)) // Super simplex
+                    //.fastSimplex(FastSimplexNoiseGenerator.newBuilder().setSeed(seed)) // Fast simplex
+                    //.perlin(PerlinNoiseGenerator.newBuilder().setSeed(seed)) // Perlin noise
+                    //.worley(WorleyNoiseGenerator.newBuilder().setSeed(seed)) // Worley noise
+                    .scale(0.01) // This is the noise scale
+                    .addModifier(v -> v * 20) // This is the height variation
                     .build();
             Point start = unit.absoluteStart();
             Point size = unit.size();
             Random random = new Random(seed);
+            var sea_level = 59; // default 59
+            var mountain_level = 90; // default 90
+            var snow_level = 120; // default 120
             for (int xo = 0; xo < size.x(); xo++){
                 for (int zo = 0; zo < size.z(); zo++){
                     int x = (int) (start.x() + xo);
@@ -61,6 +70,7 @@ public class Main {
                     double height = noise.evaluateNoise(x, z);
                     if (height < -64) height = -60;
                     height = height +  70;
+
                     for (int y = (int) start.y(); y < start.y() +size.y(); y++){
                         if (y == size.y()){
                             unit.modifier().setBlock(x, y, z, Block.BEDROCK);
@@ -72,9 +82,9 @@ public class Main {
                         }
                         else{
                             if(y <= height){
-                                if(y <= 90){
+                                if(y <= mountain_level){
                                     if(y >= height-1){
-                                        if(y < 59){
+                                        if(y < sea_level){
                                             unit.modifier().setBlock(x, y, z, Block.SAND);
                                         }
                                         else {
@@ -84,26 +94,41 @@ public class Main {
                                         unit.modifier().setBlock(x, y, z, Block.DIRT);
                                     } else if (y > 0) {
                                         unit.modifier().setBlock(x, y, z, Block.STONE);
+                                        if(random.nextFloat() < 0.1){
+                                            var orerandom = random.nextFloat();
+                                            if(orerandom < 0.3){
+                                                unit.modifier().setBlock(x, y, z, Block.IRON_ORE);
+                                            }
+                                            else{
+                                                unit.modifier().setBlock(x, y, z, Block.COAL_ORE);
+                                            }
+                                        }
                                     } else{
                                         unit.modifier().setBlock(x, y, z, Block.DEEPSLATE);
                                     }
                                 }
                                 else{
-                                    unit.modifier().setBlock(x, y, z, Block.STONE);
+                                    if(height < snow_level){
+                                        unit.modifier().setBlock(x, y, z, Block.STONE);
+                                    }
+                                    else{
+                                        unit.modifier().setBlock(x, y, z, Block.SNOW_BLOCK);
+                                        unit.modifier().setBlock(x, y+1, z, Block.SNOW);
+                                    }
                                 }
                             }
                             else{
-                                if(y<59){
+                                if(y<sea_level){
                                     unit.modifier().setBlock(x, y, z, Block.WATER);
                                 }
                             }
                         }
                         if(y >= height && y <= height + 1){
                             var nextFeature = random.nextFloat();
-                            if(nextFeature <= 0.1 && y > 59 && y < 90){
+                            if(nextFeature <= 0.1 && y > sea_level && y < mountain_level){
                                 unit.modifier().setBlock(x, y, z, Block.SHORT_GRASS);
                             }
-                            if(nextFeature >=0.875 && nextFeature < 0.9 && y > 59 && y < 90){
+                            if(nextFeature >=0.875 && nextFeature < 0.9 && y > sea_level && y < mountain_level){
                                 var flowerRandom = random.nextFloat();
                                 if(flowerRandom <= 0.25){
                                     unit.modifier().setBlock(x, y, z, Block.POPPY);
@@ -118,11 +143,11 @@ public class Main {
                                     unit.modifier().setBlock(x, y, z, Block.CORNFLOWER);
                                 }
                             }
-                            if(nextFeature >=0.85 && nextFeature < 0.9 && y < 59){
+                            if(nextFeature >=0.85 && nextFeature < 0.9 && y < sea_level){
                                 unit.modifier().setBlock(x, y, z, Block.SEAGRASS);
                             }
 
-                            if(random.nextFloat() >= 0.9975 && y > 59 && y < 90){
+                            if(random.nextFloat() >= 0.9975 && y > sea_level && y < mountain_level){
                                 int finalY = y;
                                 unit.fork(setter -> {
                                     int treeHeight = 5;
@@ -243,6 +268,11 @@ public class Main {
         globalEventHandler.addListener(InstanceTickEvent.class, event -> {
             if(MinecraftServer.TICK_PER_SECOND < 20){
                 Audiences.server().sendMessage(Component.text("Server running below 20TPS"));
+            }
+        });
+        globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
+            if(event.getBlock() == Block.STONE_STAIRS){
+                event.setBlock(Block.STONE_STAIRS.withProperty("facing", "south"));
             }
         });
 
