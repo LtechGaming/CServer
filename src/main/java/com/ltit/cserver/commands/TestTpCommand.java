@@ -10,6 +10,7 @@ public class TestTpCommand extends Command {
         setDefaultExecutor((sender, context) -> {
             if(sender instanceof Player player){
                 player.teleport(new Pos((double) 30000000, 100, 0));
+                sender.sendMessage("Teleported to 30m, 100, 0");
             }
         });
     }

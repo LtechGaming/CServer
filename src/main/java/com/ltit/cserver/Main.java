@@ -36,7 +36,6 @@ import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
-
         // Initialize the server
         MinecraftServer minecraftServer = MinecraftServer.init();
         // Register Events (set spawn instance, teleport player at spawn)

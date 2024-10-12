@@ -25,15 +25,19 @@ public class GamemodeCommand extends Command {
                 if(Objects.equals(commandContext.get("gm").toString(), "creative")){
                     player.setGameMode(GameMode.CREATIVE);
                     player.setAllowFlying(true);
+                    commandSender.sendMessage("Switched gamemode to creative");
                 } else if (Objects.equals(commandContext.get("gm").toString(), "survival")) {
                     player.setGameMode(GameMode.SURVIVAL);
                     player.setAllowFlying(false);
+                    commandSender.sendMessage("Switched gamemode to survival");
                 } else if (Objects.equals(commandContext.get("gm").toString(), "spectator")) {
                     player.setGameMode(GameMode.SPECTATOR);
                     player.setAllowFlying(false);
+                    commandSender.sendMessage("Switched gamemode to spectator");
                 } else if (Objects.equals(commandContext.get("gm").toString(), "hybrid")) {
                     player.setGameMode(GameMode.SURVIVAL);
                     player.setAllowFlying(true);
+                    commandSender.sendMessage("Switched gamemode to hybrid");
                 } else{
                     commandSender.sendMessage("did not match");
                 }

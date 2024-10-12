@@ -10,6 +10,7 @@ public class SpawnCommand extends Command {
         setDefaultExecutor((sender, context) -> {
             if(sender instanceof Player player){
                 player.teleport(new Pos(0, 102, 0));
+                sender.sendMessage("Teleported to spawn");
             }
         });
     }
