@@ -219,6 +219,9 @@ public class Main {
                     itemEntity.setPickupDelay(Duration.ofMillis(10));
                 }
             }
+            if(event.getBlock() == Block.SEAGRASS){
+                event.setResultBlock(Block.WATER);
+            }
         });
         globalEventHandler.addListener(PickupItemEvent.class, event ->{
             if(event.getLivingEntity() instanceof Player player){
@@ -272,6 +275,11 @@ public class Main {
         globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
             if(event.getBlock() == Block.STONE_STAIRS){
                 event.setBlock(Block.STONE_STAIRS.withProperty("facing", "south"));
+            }
+        });
+        globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
+            if(event.getBlock() == Block.SEAGRASS && instanceContainer.getBlock(new Pos(event.getBlockPosition())) == Block.AIR){
+                event.setCancelled(true);
             }
         });
 
