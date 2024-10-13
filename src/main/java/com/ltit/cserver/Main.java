@@ -273,13 +273,19 @@ public class Main {
             }
         });
         globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
-            if(event.getBlock() == Block.STONE_STAIRS){
-                event.setBlock(Block.STONE_STAIRS.withProperty("facing", "south"));
-            }
-        });
-        globalEventHandler.addListener(PlayerBlockPlaceEvent.class, event -> {
             if(event.getBlock() == Block.SEAGRASS && instanceContainer.getBlock(new Pos(event.getBlockPosition())) == Block.AIR){
                 event.setCancelled(true);
+            }
+            if(event.getBlock() == Block.OAK_DOOR){
+                if(instanceContainer.getBlock(new Pos(event.getBlockPosition().add(0, 1, 0))) == Block.AIR){
+                    instanceContainer.setBlock(new Pos(event.getBlockPosition().add(0, 1, 0)), Block.OAK_DOOR.withProperty("half", "upper"));
+                }
+                else if(instanceContainer.getBlock(new Pos(event.getBlockPosition())) == Block.WATER && instanceContainer.getBlock(new Pos(event.getBlockPosition().add(0, 1, 0))) == Block.WATER){
+                    instanceContainer.setBlock(new Pos(event.getBlockPosition().add(0, 1, 0)), Block.OAK_DOOR.withProperty("half", "upper"));
+                }
+                else {
+                    event.setCancelled(true);
+                }
             }
         });
 

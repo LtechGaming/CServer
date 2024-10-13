@@ -6,7 +6,7 @@ public class InfoCommand extends Command {
     public InfoCommand(){
         super("info", "serverinfo");
         setDefaultExecutor(((sender, context) -> {
-            sender.sendMessage("LTIT CServer Beta 0.0.1");
+            sender.sendMessage("LTIT CServer Beta 0.0.2");
         }));
     }
 }
