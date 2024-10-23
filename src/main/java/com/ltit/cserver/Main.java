@@ -222,6 +222,16 @@ public class Main {
             if(event.getBlock() == Block.SEAGRASS){
                 event.setResultBlock(Block.WATER);
             }
+            if(event.getBlock() == Block.OAK_DOOR.withProperty("half", "lower")){
+                if(instanceContainer.getBlock( new Pos(event.getBlockPosition().add(0, 1, 0))) == Block.OAK_DOOR.withProperty("half", "upper")) {
+                    instanceContainer.setBlock(new Pos(event.getBlockPosition().add(0, 1, 0)), Block.AIR);
+                }
+            }
+            if(event.getBlock() == Block.OAK_DOOR.withProperty("half", "upper")){
+                if(instanceContainer.getBlock( new Pos(event.getBlockPosition().add(0, -1, 0))) == Block.OAK_DOOR.withProperty("half", "lower")) {
+                    instanceContainer.setBlock(new Pos(event.getBlockPosition().add(0, -1, 0)), Block.AIR);
+                }
+            }
         });
         globalEventHandler.addListener(PickupItemEvent.class, event ->{
             if(event.getLivingEntity() instanceof Player player){
